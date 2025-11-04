@@ -9,7 +9,6 @@ import (
 	"github.com/basel-ax/windy-cams/internal/domain"
 )
 
-const webcamsURL = "https://api.windy.com/api/webcams/v2/list"
 
 // windyWebcam defines the structure of a webcam object from the Windy API response.
 type windyWebcam struct {
@@ -34,6 +33,7 @@ type windyResponse struct {
 type Client struct {
 	apiKey     string
 	httpClient *http.Client
+	BaseURL    string
 }
 
 // NewClient creates a new Windy API client.
@@ -41,12 +41,13 @@ func NewClient(apiKey string) *Client {
 	return &Client{
 		apiKey:     apiKey,
 		httpClient: &http.Client{},
+		BaseURL:    "https://api.windy.com/api/webcams/v2",
 	}
 }
 
 // GetWebcams fetches the list of webcams from the Windy API.
 func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, webcamsURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/list/limit=50", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
