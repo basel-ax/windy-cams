@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"os"
 
@@ -12,6 +13,9 @@ import (
 )
 
 func main() {
+	devMode := flag.Bool("dev", false, "Enable developer mode for verbose logging")
+	flag.Parse()
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctx := context.Background()
 
@@ -45,6 +49,9 @@ func main() {
 
 	// 4. Initialize clients, repositories, and services
 	windyClient := windy.NewClient(cfg.WindyAPIKey)
+	if *devMode {
+		windyClient.WithLogger(logger)
+	}
 	webcamRepo := webcam.NewRepository(db)
 	webcamService := webcam.NewService(webcamRepo, windyClient, logger)
 

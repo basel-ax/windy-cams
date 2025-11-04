@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/basel-ax/windy-cams/internal/domain"
@@ -34,6 +35,7 @@ type Client struct {
 	apiKey     string
 	httpClient *http.Client
 	BaseURL    string
+	logger     *slog.Logger
 }
 
 // NewClient creates a new Windy API client.
@@ -45,11 +47,21 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
+// WithLogger sets a logger for the client to enable request logging.
+func (c *Client) WithLogger(logger *slog.Logger) *Client {
+	c.logger = logger
+	return c
+}
+
 // GetWebcams fetches the list of webcams from the Windy API.
 func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/list/limit=50", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if c.logger != nil {
+		c.logger.Info("sending request to windy api", slog.String("method", req.Method), slog.String("url", req.URL.String()))
 	}
 
 	req.Header.Set("x-windy-api-key", c.apiKey)
