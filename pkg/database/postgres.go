@@ -31,5 +31,5 @@ func NewClient(config *configs.Config) (*gorm.DB, error) {
 
 // AutoMigrate runs database migrations for the domain models.
 func AutoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(&domain.Platform{})
+	return db.AutoMigrate(&domain.Webcam{})
 }

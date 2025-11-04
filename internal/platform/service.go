@@ -1,4 +1,4 @@
-package platform
+package webcam
 
 import (
 	"context"

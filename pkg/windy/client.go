@@ -9,7 +9,7 @@ import (
 	"github.com/basel-ax/windy-cams/internal/domain"
 )
 
-const platformsURL = "https://api.windy.com/api/webcams/v2/platforms"
+const webcamsURL = "https://api.windy.com/api/webcams/v2/list"
 
 // Client is a client for the Windy Webcams API.
 type Client struct {
