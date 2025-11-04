@@ -77,6 +77,9 @@ func main() {
 			logger.Error("failed to export all webcams", slog.Any("error", err))
 			os.Exit(1)
 		}
+		if *devMode {
+			logger.Info("successfully exported webcams", slog.Int("count", len(webcams)))
+		}
 		if err := webcamRepo.SaveWebcams(ctx, webcams); err != nil {
 			logger.Error("failed to save all exported webcams", slog.Any("error", err))
 			os.Exit(1)
