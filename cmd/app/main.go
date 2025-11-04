@@ -15,6 +15,7 @@ import (
 
 func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode for verbose logging")
+	exportAll := flag.Bool("export-all", false, "Export all webcams and store them")
 	flag.Parse()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -69,10 +70,24 @@ func main() {
 	webcamService := webcam.NewService(webcamRepo, windyClient, logger)
 
 	// 5. Run the business logic
-	logger.Info("fetching and storing webcams")
-	if err := webcamService.FetchAndStoreWebcams(ctx); err != nil {
-		logger.Error("failed to fetch and store webcams", slog.Any("error", err))
-		os.Exit(1)
+	if *exportAll {
+		logger.Info("exporting and storing all webcams")
+		webcams, err := windyClient.ExportAllWebcams(ctx)
+		if err != nil {
+			logger.Error("failed to export all webcams", slog.Any("error", err))
+			os.Exit(1)
+		}
+		if err := webcamRepo.SaveWebcams(ctx, webcams); err != nil {
+			logger.Error("failed to save all exported webcams", slog.Any("error", err))
+			os.Exit(1)
+		}
+		logger.Info("exported webcams have been stored successfully")
+	} else {
+		logger.Info("fetching and storing webcams")
+		if err := webcamService.FetchAndStoreWebcams(ctx); err != nil {
+			logger.Error("failed to fetch and store webcams", slog.Any("error", err))
+			os.Exit(1)
+		}
+		logger.Info("process finished successfully")
 	}
-	logger.Info("process finished successfully")
 }
