@@ -65,6 +65,13 @@ func TestGetWebcams(t *testing.T) {
 				if r.Header.Get("x-windy-api-key") != "test-api-key" {
 					t.Errorf("missing or incorrect x-windy-api-key header")
 				}
+				q := r.URL.Query()
+				if q.Get("limit") != "50" {
+					t.Errorf("expected limit=50, got %s", q.Get("limit"))
+				}
+				if q.Get("offset") != "0" {
+					t.Errorf("expected offset=0, got %s", q.Get("offset"))
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write(successBody)
 			},
@@ -100,7 +107,7 @@ func TestGetWebcams(t *testing.T) {
 			client := NewClient("test-api-key")
 			client.BaseURL = server.URL
 
-			webcams, err := client.GetWebcams(context.Background())
+			webcams, err := client.GetWebcams(context.Background(), 50, 0)
 
 			if tc.wantErr {
 				if err == nil {

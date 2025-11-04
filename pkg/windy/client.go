@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	"github.com/basel-ax/windy-cams/internal/domain"
 	"go.opentelemetry.io/otel"
@@ -59,11 +61,22 @@ func (c *Client) WithLogger(logger *slog.Logger) *Client {
 }
 
 // GetWebcams fetches the list of webcams from the Windy API.
-func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
+func (c *Client) GetWebcams(ctx context.Context, limit, offset int) ([]domain.Webcam, error) {
 	ctx, span := c.tracer.Start(ctx, "windy.client.GetWebcams")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"api/v3/webcams", nil)
+	baseURL, err := url.Parse(c.BaseURL + "api/v3/webcams")
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, fmt.Errorf("failed to parse base URL: %w", err)
+	}
+	params := url.Values{}
+	params.Add("limit", strconv.Itoa(limit))
+	params.Add("offset", strconv.Itoa(offset))
+	baseURL.RawQuery = params.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL.String(), nil)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
