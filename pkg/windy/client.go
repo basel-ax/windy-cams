@@ -130,7 +130,7 @@ func (c *Client) ExportAllWebcams(ctx context.Context) ([]domain.Webcam, error) 
 		c.logger.Info("sending request to windy api for export", slog.String("method", req.Method), slog.String("url", req.URL.String()))
 	}
 
-	req.Header.Set("x-windy-api-key", c.apiKey)
+	req.Header.Set("x-windy-key", c.apiKey)
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)

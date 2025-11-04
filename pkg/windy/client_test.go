@@ -145,6 +145,9 @@ func TestExportAllWebcams(t *testing.T) {
 				if r.URL.Path != "/export/all-webcams.json" {
 					t.Errorf("expected to request '/export/all-webcams.json', got: %s", r.URL.Path)
 				}
+				if r.Header.Get("x-windy-key") != "test-api-key" {
+					t.Errorf("missing or incorrect x-windy-key header")
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write(successBody)
 			},
