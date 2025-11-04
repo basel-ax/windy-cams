@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/basel-ax/windy-cams/configs"
-	"github.com/basel-ax/windy-cams/internal/platform"
+	"github.com/basel-ax/windy-cams/internal/webcam"
 	"github.com/basel-ax/windy-cams/pkg/database"
 	"github.com/basel-ax/windy-cams/pkg/windy"
 )
@@ -45,13 +45,13 @@ func main() {
 
 	// 4. Initialize clients, repositories, and services
 	windyClient := windy.NewClient(cfg.WindyAPIKey)
-	platformRepo := platform.NewRepository(db)
-	platformService := platform.NewService(platformRepo, windyClient, logger)
+	webcamRepo := webcam.NewRepository(db)
+	webcamService := webcam.NewService(webcamRepo, windyClient, logger)
 
 	// 5. Run the business logic
-	logger.Info("fetching and storing platforms")
-	if err := platformService.FetchAndStorePlatforms(ctx); err != nil {
-		logger.Error("failed to fetch and store platforms", slog.Any("error", err))
+	logger.Info("fetching and storing webcams")
+	if err := webcamService.FetchAndStoreWebcams(ctx); err != nil {
+		logger.Error("failed to fetch and store webcams", slog.Any("error", err))
 		os.Exit(1)
 	}
 	logger.Info("process finished successfully")

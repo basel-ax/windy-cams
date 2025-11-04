@@ -8,9 +8,9 @@ import (
 	"github.com/basel-ax/windy-cams/pkg/windy"
 )
 
-// Service defines the interface for platform business logic.
+// Service defines the interface for webcam business logic.
 type Service interface {
-	FetchAndStorePlatforms(ctx context.Context) error
+	FetchAndStoreWebcams(ctx context.Context) error
 }
 
 type service struct {
@@ -28,26 +28,26 @@ func NewService(repo Repository, windyClient *windy.Client, logger *slog.Logger)
 	}
 }
 
-// FetchAndStorePlatforms fetches platforms from Windy API and stores them in the repository.
-func (s *service) FetchAndStorePlatforms(ctx context.Context) error {
-	s.logger.Info("fetching platforms from windy api")
-	platforms, err := s.windyClient.GetPlatforms(ctx)
+// FetchAndStoreWebcams fetches webcams from Windy API and stores them in the repository.
+func (s *service) FetchAndStoreWebcams(ctx context.Context) error {
+	s.logger.Info("fetching webcams from windy api")
+	webcams, err := s.windyClient.GetWebcams(ctx)
 	if err != nil {
-		s.logger.Error("failed to get platforms from windy", slog.Any("error", err))
-		return fmt.Errorf("failed to get platforms from windy: %w", err)
+		s.logger.Error("failed to get webcams from windy", slog.Any("error", err))
+		return fmt.Errorf("failed to get webcams from windy: %w", err)
 	}
 
-	if len(platforms) == 0 {
-		s.logger.Info("no new platforms to save")
+	if len(webcams) == 0 {
+		s.logger.Info("no new webcams to save")
 		return nil
 	}
 
-	s.logger.Info("saving platforms", slog.Int("count", len(platforms)))
-	if err := s.repo.SavePlatforms(ctx, platforms); err != nil {
-		s.logger.Error("failed to save platforms", slog.Any("error", err))
-		return fmt.Errorf("failed to save platforms: %w", err)
+	s.logger.Info("saving webcams", slog.Int("count", len(webcams)))
+	if err := s.repo.SaveWebcams(ctx, webcams); err != nil {
+		s.logger.Error("failed to save webcams", slog.Any("error", err))
+		return fmt.Errorf("failed to save webcams: %w", err)
 	}
 
-	s.logger.Info("successfully saved platforms", slog.Int("count", len(platforms)))
+	s.logger.Info("successfully saved webcams", slog.Int("count", len(webcams)))
 	return nil
 }
