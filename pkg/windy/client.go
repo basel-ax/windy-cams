@@ -14,7 +14,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-
 // windyWebcam defines the structure of a webcam object from the Windy API response.
 type windyWebcam struct {
 	ID     string `json:"id"`
@@ -48,7 +47,7 @@ func NewClient(apiKey string) *Client {
 	return &Client{
 		apiKey:     apiKey,
 		httpClient: &http.Client{},
-		BaseURL:    "https://webcams.windy.com",
+		BaseURL:    "https://api.windy.com/webcams/",
 		tracer:     otel.Tracer("windy-client"),
 	}
 }
@@ -64,7 +63,7 @@ func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
 	ctx, span := c.tracer.Start(ctx, "windy.client.GetWebcams")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/api/v3/webcams", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"api/v3/webcams", nil)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -120,7 +119,7 @@ func (c *Client) ExportAllWebcams(ctx context.Context) ([]domain.Webcam, error) 
 	ctx, span := c.tracer.Start(ctx, "windy.client.ExportAllWebcams")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/export/all-webcams.json", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"export/all-webcams.json", nil)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
