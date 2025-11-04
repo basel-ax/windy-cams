@@ -62,8 +62,8 @@ func TestGetWebcams(t *testing.T) {
 				if r.URL.Path != "/api/v3/webcams" {
 					t.Errorf("expected to request '/api/v3/webcams', got: %s", r.URL.Path)
 				}
-				if r.Header.Get("x-windy-api-key") != "test-api-key" {
-					t.Errorf("missing or incorrect x-windy-api-key header")
+				if r.Header.Get("x-windy-key") != "test-api-key" {
+					t.Errorf("missing or incorrect x-windy-key header")
 				}
 				q := r.URL.Query()
 				if q.Get("limit") != "50" {
