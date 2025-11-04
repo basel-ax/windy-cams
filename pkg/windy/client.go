@@ -8,6 +8,10 @@ import (
 	"net/http"
 
 	"github.com/basel-ax/windy-cams/internal/domain"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 
@@ -36,6 +40,7 @@ type Client struct {
 	httpClient *http.Client
 	BaseURL    string
 	logger     *slog.Logger
+	tracer     trace.Tracer
 }
 
 // NewClient creates a new Windy API client.
@@ -44,6 +49,7 @@ func NewClient(apiKey string) *Client {
 		apiKey:     apiKey,
 		httpClient: &http.Client{},
 		BaseURL:    "https://api.windy.com/api/webcams/v2",
+		tracer:     otel.Tracer("windy-client"),
 	}
 }
 
@@ -55,8 +61,13 @@ func (c *Client) WithLogger(logger *slog.Logger) *Client {
 
 // GetWebcams fetches the list of webcams from the Windy API.
 func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
+	ctx, span := c.tracer.Start(ctx, "windy.client.GetWebcams")
+	defer span.End()
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/list/limit=50", nil)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
@@ -69,16 +80,23 @@ func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, fmt.Errorf("failed to perform request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+		err := fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
 	var windyResp windyResponse
 	if err := json.NewDecoder(resp.Body).Decode(&windyResp); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -91,6 +109,8 @@ func (c *Client) GetWebcams(ctx context.Context) ([]domain.Webcam, error) {
 			ViewURL: windyCam.URL.Current.Desktop,
 		})
 	}
+
+	span.SetAttributes(attribute.Int("webcams.count", len(webcams)))
 
 	return webcams, nil
 }

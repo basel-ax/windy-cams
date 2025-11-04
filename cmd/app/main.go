@@ -9,6 +9,7 @@ import (
 	"github.com/basel-ax/windy-cams/configs"
 	"github.com/basel-ax/windy-cams/internal/webcam"
 	"github.com/basel-ax/windy-cams/pkg/database"
+	"github.com/basel-ax/windy-cams/pkg/observability"
 	"github.com/basel-ax/windy-cams/pkg/windy"
 )
 
@@ -18,6 +19,18 @@ func main() {
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctx := context.Background()
+
+	// Initialize OpenTelemetry
+	tp, err := observability.InitTracerProvider()
+	if err != nil {
+		logger.Error("failed to initialize tracer provider", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			logger.Error("failed to shutdown tracer provider", slog.Any("error", err))
+		}
+	}()
 
 	// 1. Load configuration
 	logger.Info("loading configuration")
