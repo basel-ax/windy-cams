@@ -1,10 +1,10 @@
-# Windy Webcams Platform Importer
+# Windy Webcams Importer
 
-This project is a Go application that fetches asset platform data from the [Windy Webcams API](https://api.windy.com/webcams/docs) and stores it in a PostgreSQL database. The application is structured following Clean Architecture principles to ensure it is modular, maintainable, and testable.
+This project is a Go application that fetches webcam data from the [Windy Webcams API](https://api.windy.com/webcams/docs) and stores it in a PostgreSQL database. The application is structured following Clean Architecture principles to ensure it is modular, maintainable, and testable.
 
 ## Table of Contents
 
-- [Windy Webcams Platform Importer](#windy-webcams-platform-importer)
+- [Windy Webcams Importer](#windy-webcams-importer)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Architecture](#architecture)
@@ -18,7 +18,7 @@ This project is a Go application that fetches asset platform data from the [Wind
 
 ## Features
 
-- Fetches platform data from the Windy API.
+- Fetches webcam data from the Windy API.
 - Stores data in a PostgreSQL database using GORM.
 - Uses GORM's auto-migration to create the database schema.
 - Configuration is managed via environment variables.
@@ -27,8 +27,8 @@ This project is a Go application that fetches asset platform data from the [Wind
 
 This project follows **Clean Architecture** principles to separate concerns and create a maintainable and scalable system. The main layers are:
 
-- **Domain**: Contains the core business logic and entities (e.g., `Platform`).
-- **Application/Service**: Orchestrates the data flow and implements use cases (e.g., `FetchAndStorePlatforms`).
+- **Domain**: Contains the core business logic and entities (e.g., `Webcam`).
+- **Application/Service**: Orchestrates the data flow and implements use cases (e.g., `FetchAndStoreWebcams`).
 - **Infrastructure/Platform**: Handles external concerns like database access (`repository`), API clients (`windy`), and configuration.
 
 Dependencies point inwards, from the outer layers (infrastructure) to the inner layers (domain), ensuring that the core business logic is independent of external frameworks and tools.
@@ -99,18 +99,50 @@ Ensure you have the following installed on your system:
 
 ## Usage
 
-To run the application, execute the `main.go` file. This will trigger a one-time operation to connect to the database, run migrations, fetch platform data from the Windy API, and store it.
+To run the application, execute the `main.go` file. This will trigger a one-time operation to connect to the database, run migrations, fetch webcam data from the Windy API, and store it.
+
+### Flags
+
+-   `-dev`: Enables developer mode, which provides verbose logging for API requests.
+-   `-export-all`: Fetches and stores the complete list of all webcams from the Windy export endpoint.
+
+### Examples
+
+**Default Run**
+
+Fetches a limited list of webcams from the API.
 
 ```sh
 go run cmd/app/main.go
+```
+
+**Developer Mode**
+
+Enables detailed logging.
+
+```sh
+go run cmd/app/main.go -dev
+```
+
+**Export All Webcams**
+
+Fetches all webcams and stores them. This is a longer-running operation.
+
+```sh
+go run cmd/app/main.go -export-all
+```
+
+You can combine flags:
+
+```sh
+go run cmd/app/main.go -dev -export-all
 ```
 
 You should see output in your console indicating the progress:
 
 ```
 Database migration completed.
-Fetching and storing platforms...
-Successfully saved <N> platforms.
+Fetching and storing webcams...
 Process finished successfully.
 ```
 
@@ -121,8 +153,8 @@ The codebase is organized to separate concerns, making it easier to maintain and
 -   `cmd/app`: Contains the main application entrypoint.
 -   `configs`: Handles loading configuration from environment variables.
 -   `internal/`: Contains the core application logic.
-    -   `domain`: Defines the primary data structures (e.g., Platform).
-    -   `platform`: Implements the business logic (service) and data access (repository) for platforms.
+    -   `domain`: Defines the primary data structures (e.g., Webcam).
+    -   `webcam`: Implements the business logic (service) and data access (repository) for webcams.
 -   `pkg/`: Contains shared, reusable packages.
     -   `database`: Manages the PostgreSQL database connection and migrations.
     -   `windy`: Provides a client for interacting with the Windy Webcams API.
