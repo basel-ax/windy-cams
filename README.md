@@ -1,99 +1,129 @@
-# Windy Webcams Platform Importer 
-This project is a Go application designed to fetch asset platform data from the [Windy Webcams API](https://api.windy.com/webcams/docs) and store it in a PostgreSQL database. The     
-application is structured following Clean Architecture principles to ensure modularity and maintainability.                                                                            
-                                                                                                                                                                                       
-## Features                                                                                                                                                                            
-                                                                                                                                                                                       
-- Fetches platform data from the Windy API.                                                                                                                                            
-- Stores the data in a PostgreSQL database using GORM.                                                                                                                                 
-- Uses GORM's auto-migration to create the necessary database schema.                                                                                                                  
-- Handles configuration via environment variables.                                                                                                                                     
-                                                                                                                                                                                       
-## Prerequisites                                                                                                                                                                       
-                                                                                                                                                                                       
-Before you begin, ensure you have the following installed:                                                                                                                             
-                                                                                                                                                                                       
-- **Go**: Version 1.18 or later.                                                                                                                                                       
-- **PostgreSQL**: A running instance of PostgreSQL.                                                                                                                                    
-                                                                                                                                                                                       
-## Getting Started                                                                                                                                                                     
-                                                                                                                                                                                       
-Follow these steps to set up and run the project locally.                                                                                                                              
-                                                                                                                                                                                       
-### 1. Clone the Repository                                                                                                                                                            
-                                                                                                                                                                                       
-```sh                                                                                                                                                                                  
-git clone <your-repository-url>                                                                                                                                                        
-cd <repository-directory>                                                                                                                                                              
-                                                                                                                                                                                       
+# Windy Webcams Platform Importer
 
-2. Set Up the Database                                                                                                                                                                 
+This project is a Go application that fetches asset platform data from the [Windy Webcams API](https://api.windy.com/webcams/docs) and stores it in a PostgreSQL database. The application is structured following Clean Architecture principles to ensure it is modular, maintainable, and testable.
 
-Make sure your PostgreSQL server is running. Connect to it and create a new database for this project.                                                                                 
+## Table of Contents
 
-                                                                                                                                                                                       
-CREATE DATABASE webcams;                                                                                                                                                               
-                                                                                                                                                                                       
+- [Features](#features)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation and Setup](#installation-and-setup)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
-3. Configure Environment Variables                                                                                                                                                     
+## Features
 
-The application uses a .env file for configuration.                                                                                                                                    
+- Fetches platform data from the Windy API.
+- Stores data in a PostgreSQL database using GORM.
+- Uses GORM's auto-migration to create the database schema.
+- Configuration is managed via environment variables.
 
- 1 Copy the example file:                                                                                                                                                              
-                                                                                                                                                                                       
-   cp .env.example .env                                                                                                                                                                
-                                                                                                                                                                                       
- 2 Edit the .env file and provide your Windy API key and PostgreSQL connection details:                                                                                                
-                                                                                                                                                                                       
-   # Windy API Key                                                                                                                                                                     
-   WINDY_API_KEY=your_actual_api_key_here                                                                                                                                              
-                                                                                                                                                                                       
-   # PostgreSQL connection details                                                                                                                                                     
-   DB_HOST=localhost                                                                                                                                                                   
-   DB_PORT=5432                                                                                                                                                                        
-   DB_USER=your_postgres_user                                                                                                                                                          
-   DB_PASSWORD=your_postgres_password                                                                                                                                                  
-   DB_NAME=webcams                                                                                                                                                                     
-   DB_SSLMODE=disable                                                                                                                                                                  
-                                                                                                                                                                                       
+## Architecture
 
-4. Install Dependencies                                                                                                                                                                
+This project follows **Clean Architecture** principles to separate concerns and create a maintainable and scalable system. The main layers are:
 
-Install the required Go modules:                                                                                                                                                       
+- **Domain**: Contains the core business logic and entities (e.g., `Platform`).
+- **Application/Service**: Orchestrates the data flow and implements use cases (e.g., `FetchAndStorePlatforms`).
+- **Infrastructure/Platform**: Handles external concerns like database access (`repository`), API clients (`windy`), and configuration.
 
-                                                                                                                                                                                       
-go mod tidy                                                                                                                                                                            
-                                                                                                                                                                                       
+Dependencies point inwards, from the outer layers (infrastructure) to the inner layers (domain), ensuring that the core business logic is independent of external frameworks and tools.
 
+## Getting Started
 
-Running the Application                                                                                                                                                                
+Follow these instructions to set up and run the project locally.
 
-To run the application, execute the main.go file. This will trigger a one-time operation to connect to the database, run migrations, fetch platform data from the Windy API, and store 
-it.                                                                                                                                                                                    
+### Prerequisites
 
-                                                                                                                                                                                       
-go run cmd/app/main.go                                                                                                                                                                 
-                                                                                                                                                                                       
+Ensure you have the following installed on your system:
 
-You should see output in your console indicating the progress:                                                                                                                         
+- [Go](https://golang.org/doc/install) (Version 1.18 or later)
+- [PostgreSQL](https://www.postgresql.org/download/)
 
-                                                                                                                                                                                       
-Database migration completed.                                                                                                                                                          
-Fetching and storing platforms...                                                                                                                                                      
-Successfully saved <N> platforms.                                                                                                                                                      
-Process finished successfully.                                                                                                                                                         
-                                                                                                                                                                                       
+### Installation and Setup
 
+1.  **Clone the Repository**
 
-Project Structure                                                                                                                                                                      
+    ```sh
+    git clone <your-repository-url>
+    cd <repository-directory>
+    ```
 
-The codebase is organized to separate concerns, making it easier to maintain and test.                                                                                                 
+2.  **Set Up the Database**
 
- • cmd/app: Contains the main application entrypoint.                                                                                                                                  
- • configs: Handles loading configuration from environment variables.                                                                                                                  
- • internal/: Contains the core application logic.                                                                                                                                     
-    • domain: Defines the primary data structures (e.g., Platform).                                                                                                                    
-    • platform: Implements the business logic (service) and data access (repository) for platforms.                                                                                    
- • pkg/: Contains shared, reusable packages.                                                                                                                                           
-    • database: Manages the PostgreSQL database connection and migrations.                                                                                                             
-    • windy: Provides a client for interacting with the Windy Webcams API. 
+    Connect to your PostgreSQL instance and create a new database.
+
+    ```sql
+    CREATE DATABASE webcams;
+    ```
+
+3.  **Configure Environment Variables**
+
+    The application uses a `.env` file for configuration. Copy the example file and update it with your credentials.
+
+    ```sh
+    cp .env.example .env
+    ```
+
+    Edit the `.env` file with your Windy API key and PostgreSQL connection details:
+
+    ```env
+    # Windy API Key
+    WINDY_API_KEY=your_actual_api_key_here
+
+    # PostgreSQL connection details
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USER=your_postgres_user
+    DB_PASSWORD=your_postgres_password
+    DB_NAME=webcams
+    DB_SSLMODE=disable
+    ```
+
+4.  **Install Dependencies**
+
+    Install the required Go modules:
+
+    ```sh
+    go mod tidy
+    ```
+
+## Usage
+
+To run the application, execute the `main.go` file. This will trigger a one-time operation to connect to the database, run migrations, fetch platform data from the Windy API, and store it.
+
+```sh
+go run cmd/app/main.go
+```
+
+You should see output in your console indicating the progress:
+
+```
+Database migration completed.
+Fetching and storing platforms...
+Successfully saved <N> platforms.
+Process finished successfully.
+```
+
+## Project Structure
+
+The codebase is organized to separate concerns, making it easier to maintain and test.
+
+-   `cmd/app`: Contains the main application entrypoint.
+-   `configs`: Handles loading configuration from environment variables.
+-   `internal/`: Contains the core application logic.
+    -   `domain`: Defines the primary data structures (e.g., Platform).
+    -   `platform`: Implements the business logic (service) and data access (repository) for platforms.
+-   `pkg/`: Contains shared, reusable packages.
+    -   `database`: Manages the PostgreSQL database connection and migrations.
+    -   `windy`: Provides a client for interacting with the Windy Webcams API.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue.
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
