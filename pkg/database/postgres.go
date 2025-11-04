@@ -6,8 +6,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"project/configs"
-	"project/internal/domain"
+	"github.com/basel-ax/windy-cams/configs"
+	"github.com/basel-ax/windy-cams/internal/domain"
 )
 
 // NewClient creates a new PostgreSQL client using GORM.

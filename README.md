@@ -4,15 +4,17 @@ This project is a Go application that fetches asset platform data from the [Wind
 
 ## Table of Contents
 
-- [Features](#features)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation and Setup](#installation-and-setup)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
+- [Windy Webcams Platform Importer](#windy-webcams-platform-importer)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Architecture](#architecture)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation and Setup](#installation-and-setup)
+  - [Usage](#usage)
+  - [Project Structure](#project-structure)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 
@@ -82,7 +84,12 @@ Ensure you have the following installed on your system:
     DB_SSLMODE=disable
     ```
 
-4.  **Install Dependencies**
+4. **Init**
+    ```bash
+    go mod init github.com/basel-ax/windy-cams
+    ```
+
+5.  **Install Dependencies**
 
     Install the required Go modules:
 

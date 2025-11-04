@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"project/pkg/windy"
+	"github.com/basel-ax/windy-cams/pkg/windy"
 )
 
 // Service defines the interface for platform business logic.

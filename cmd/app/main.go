@@ -5,10 +5,10 @@ import (
 	"log/slog"
 	"os"
 
-	"project/configs"
-	"project/internal/platform"
-	"project/pkg/database"
-	"project/pkg/windy"
+	"github.com/basel-ax/windy-cams/configs"
+	"github.com/basel-ax/windy-cams/internal/platform"
+	"github.com/basel-ax/windy-cams/pkg/database"
+	"github.com/basel-ax/windy-cams/pkg/windy"
 )
 
 func main() {

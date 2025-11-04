@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"project/internal/domain"
+	"github.com/basel-ax/windy-cams/internal/domain"
 )
 
 const platformsURL = "https://api.windy.com/api/webcams/v2/platforms"

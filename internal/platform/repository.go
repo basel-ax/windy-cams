@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"project/internal/domain"
+	"github.com/basel-ax/windy-cams/internal/domain"
 )
 
 // Repository defines the interface for platform data operations.
