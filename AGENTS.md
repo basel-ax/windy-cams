@@ -4,6 +4,18 @@
 Files in the list contain sensitive data, they MUST NOT be read
 - .env
 
+## Project Overview
+
+This project is a Go application that fetches asset platform data from the Windy Webcams API and stores it in a PostgreSQL database. The application is structured following Clean Architecture principles to ensure it is modular, maintainable, and testable. It uses GORM for database interactions and supports configuration via environment variables.
+
+## Build and Test Commands
+
+- **Build**: `go build cmd/app/main.go`
+- **Run**: `go run cmd/app/main.go`
+- **Test**: `go test ./...`
+- **Lint**: `golangci-lint run`
+- **Format**: `go fmt ./...`
+
 ## Code style guidelines
 
 ### General Responsibilities:
@@ -36,6 +48,25 @@ Files in the list contain sensitive data, they MUST NOT be read
 - Leverage **Go's context propagation** for request-scoped values, deadlines, and cancellations.
 - Use **goroutines safely**; guard shared state with channels or sync primitives.
 - **Defer closing resources** and handle them carefully to avoid leaks.
+
+### Code Style and Conventions:
+- **Imports**: Group imports into three blocks: standard library, third-party packages, and local packages. Use blank lines to separate groups. Remove unused imports.
+- **Formatting**: Use `go fmt` and `goimports` for consistent formatting. Follow Go's official style guide.
+- **Types**: Use meaningful type names. Prefer structs over maps for complex data. Use interfaces for abstraction.
+- **Naming Conventions**: Use camelCase for unexported identifiers, PascalCase for exported. Keep names descriptive but concise. Use `err` for errors, `ctx` for context.
+- **Error Handling**: Return errors early. Use `errors.Is` and `errors.As` for error checking. Wrap errors with context using `fmt.Errorf`.
+- **Comments**: Document exported functions and types with GoDoc comments. Use `//` for single-line comments, `/* */` for multi-line.
+- **Constants**: Use `const` for immutable values. Group related constants.
+- **Variables**: Declare variables close to their use. Use `:=` for short variable declarations. Avoid global variables.
+- **Functions**: Keep functions small and focused. Use receivers for methods. Return early to reduce nesting.
+- **Structs**: Use embedded structs for composition. Tag fields appropriately for JSON, GORM, etc.
+- **Interfaces**: Define small, focused interfaces. Use them for dependency injection.
+- **Pointers**: Use pointers for mutable parameters and to avoid copying large structs.
+- **Slices and Maps**: Initialize with `make` when possible. Use `append` for slices. Check for nil before accessing.
+- **Concurrency**: Use channels for communication. Use `sync.WaitGroup` for synchronization. Avoid race conditions.
+- **Logging**: Use structured logging with `slog`. Include relevant context in log messages.
+- **Testing**: Write table-driven tests. Use `t.Parallel()` for parallel tests. Mock dependencies.
+- **Performance**: Profile before optimizing. Use `sync.Pool` for object reuse. Minimize allocations.
 
 ### Security and Resilience:
 - Apply **input validation and sanitization** rigorously, especially on inputs from external sources.
