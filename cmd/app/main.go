@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 
 	"project/configs"
 	"project/internal/platform"
@@ -11,38 +12,47 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctx := context.Background()
 
 	// 1. Load configuration
+	logger.Info("loading configuration")
 	cfg, err := configs.LoadConfig()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		logger.Error("failed to load config", slog.Any("error", err))
+		os.Exit(1)
 	}
 	if cfg.WindyAPIKey == "" || cfg.WindyAPIKey == "your_api_key_here" {
-		log.Fatal("WINDY_API_KEY is not set in your .env file")
+		logger.Error("WINDY_API_KEY is not set in your .env file")
+		os.Exit(1)
 	}
 
 	// 2. Initialize database
+	logger.Info("initializing database client")
 	db, err := database.NewClient(cfg)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		logger.Error("failed to connect to database", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// 3. Run migrations
+	logger.Info("running database migrations")
 	if err := database.AutoMigrate(db); err != nil {
-		log.Fatalf("failed to run migrations: %v", err)
+		logger.Error("failed to run migrations", slog.Any("error", err))
+		os.Exit(1)
 	}
-	log.Println("Database migration completed.")
+	logger.Info("database migration completed")
 
 	// 4. Initialize clients, repositories, and services
 	windyClient := windy.NewClient(cfg.WindyAPIKey)
 	platformRepo := platform.NewRepository(db)
-	platformService := platform.NewService(platformRepo, windyClient)
+	platformService := platform.NewService(platformRepo, windyClient, logger)
 
 	// 5. Run the business logic
-	log.Println("Fetching and storing platforms...")
+	logger.Info("fetching and storing platforms")
 	if err := platformService.FetchAndStorePlatforms(ctx); err != nil {
-		log.Fatalf("failed to fetch and store platforms: %v", err)
+		logger.Error("failed to fetch and store platforms", slog.Any("error", err))
+		os.Exit(1)
 	}
-	log.Println("Process finished successfully.")
+	logger.Info("process finished successfully")
 }
