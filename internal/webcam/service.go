@@ -31,7 +31,7 @@ func NewService(repo Repository, windyClient *windy.Client, logger *slog.Logger)
 // FetchAndStoreWebcams fetches webcams from Windy API and stores them in the repository.
 func (s *service) FetchAndStoreWebcams(ctx context.Context) error {
 	s.logger.Info("fetching webcams from windy api")
-	webcams, err := s.windyClient.GetWebcams(ctx)
+	webcams, err := s.windyClient.ExportAllWebcams(ctx)
 	if err != nil {
 		s.logger.Error("failed to get webcams from windy", slog.Any("error", err))
 		return fmt.Errorf("failed to get webcams from windy: %w", err)
