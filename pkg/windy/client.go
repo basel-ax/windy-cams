@@ -49,7 +49,7 @@ func NewClient(apiKey string) *Client {
 	return &Client{
 		apiKey:     apiKey,
 		httpClient: &http.Client{},
-		BaseURL:    "https://webcams.windy.com/",
+		BaseURL:    "https://api.windy.com/webcams/",
 		tracer:     otel.Tracer("windy-client"),
 	}
 }
@@ -78,99 +78,3 @@ func (c *Client) GetWebcams(ctx context.Context, limit, offset int) ([]domain.We
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL.String(), nil)
 	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	if c.logger != nil {
-		c.logger.Info("sending request to windy api", slog.String("method", req.Method), slog.String("url", req.URL.String()))
-	}
-
-	req.Header.Set("x-windy-api-key", c.apiKey)
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to perform request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err := fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	var windyResp windyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&windyResp); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	webcams := make([]domain.Webcam, 0, len(windyResp.Result.Webcams))
-	for _, windyCam := range windyResp.Result.Webcams {
-		webcams = append(webcams, domain.Webcam{
-			ID:      windyCam.ID,
-			Title:   windyCam.Title,
-			Status:  windyCam.Status,
-			ViewURL: windyCam.URL.Current.Desktop,
-		})
-	}
-
-	span.SetAttributes(attribute.Int("webcams.count", len(webcams)))
-
-	return webcams, nil
-}
-
-// ExportAllWebcams fetches a JSON file with all webcams from the Windy export endpoint.
-func (c *Client) ExportAllWebcams(ctx context.Context) ([]domain.Webcam, error) {
-	ctx, span := c.tracer.Start(ctx, "windy.client.ExportAllWebcams")
-	defer span.End()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"export/all-webcams.json", nil)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	if c.logger != nil {
-		c.logger.Info("sending request to windy api for export", slog.String("method", req.Method), slog.String("url", req.URL.String()))
-	}
-
-	req.Header.Set("x-windy-api-key", c.apiKey)
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to perform request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err := fmt.Errorf("received non-200 status code: %d", resp.StatusCode)
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	var webcams []domain.Webcam
-	// The export endpoint returns a flat array of webcam objects.
-	// We make an assumption here that its structure is compatible with domain.Webcam.
-	if err := json.NewDecoder(resp.Body).Decode(&webcams); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	span.SetAttributes(attribute.Int("webcams.count", len(webcams)))
-
-	return webcams, nil
-}
