@@ -36,11 +36,6 @@ func NewClientWithDevMode(apiKey string, devMode bool) *Client {
 	}
 }
 
-// APIResponse represents the top-level structure of the API response.
-type APIResponse struct {
-	Result Result `json:"result"`
-}
-
 // Result holds the list of webcams and total count from the API.
 type Result struct {
 	Total   int      `json:"total"`
@@ -101,12 +96,12 @@ func (c *Client) GetWebcams(cfg *config.Config) ([]Webcam, int, error) {
 		log.Printf("Windy API Response:\n%s\n", string(body))
 	}
 
-	var apiResponse APIResponse
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
+	var result Result
+	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, 0, fmt.Errorf("failed to decode API response: %w", err)
 	}
 
-	return apiResponse.Result.Webcams, apiResponse.Result.Total, nil
+	return result.Webcams, result.Total, nil
 }
 
 // GetWebcamsWithParams fetches a list of webcams with specific parameters.
@@ -144,10 +139,10 @@ func (c *Client) GetWebcamsWithParams(continent string, limit, offset int) ([]We
 		log.Printf("Windy API Response:\n%s\n", string(body))
 	}
 
-	var apiResponse APIResponse
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
+	var result Result
+	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, 0, fmt.Errorf("failed to decode API response: %w", err)
 	}
 
-	return apiResponse.Result.Webcams, apiResponse.Result.Total, nil
+	return result.Webcams, result.Total, nil
 }

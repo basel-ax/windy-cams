@@ -3,17 +3,19 @@ package storage
 import (
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/basel-ax/windy-cams/pkg/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // Webcam defines the database model for a webcam.
 type Webcam struct {
-	gorm.Model
-	WebcamID  uint64 `gorm:"uniqueIndex"`
+	WebcamID  uint64 `gorm:"primaryKey"`
 	ApiStatus string
 	Status    string
 	Title     string `gorm:"index"`
@@ -22,10 +24,12 @@ type Webcam struct {
 	City      string
 	Country   string
 	Continent string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // New initializes a new PostgreSQL database connection.
-func New(cfg *config.Config) *gorm.DB {
+func New(cfg *config.Config, devMode bool) *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		cfg.DBHost,
 		cfg.DBUser,
@@ -34,7 +38,24 @@ func New(cfg *config.Config) *gorm.DB {
 		cfg.DBPort,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	logLevel := logger.Silent
+	if devMode {
+		logLevel = logger.Info
+	}
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logLevel,
+			IgnoreRecordNotFoundError: !devMode,
+			Colorful:                  false,
+		},
+	)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

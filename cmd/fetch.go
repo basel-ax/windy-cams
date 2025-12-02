@@ -6,6 +6,7 @@ import (
 	"github.com/basel-ax/windy-cams/pkg/config"
 	"github.com/basel-ax/windy-cams/pkg/storage"
 	"github.com/basel-ax/windy-cams/pkg/windy"
+	"gorm.io/gorm"
 )
 
 func runFetch(devMode bool) {
@@ -16,7 +17,7 @@ func runFetch(devMode bool) {
 	log.Println("Configuration loaded successfully.")
 
 	// Initialize database
-	db := storage.New(cfg)
+	db := storage.New(cfg, devMode)
 	log.Println("Database connection established and schema migrated.")
 
 	// Create Windy API client
@@ -46,14 +47,21 @@ func runFetch(devMode bool) {
 			Continent: apiWebcam.Location.Continent,
 		}
 
-		// Using FirstOrCreate to avoid duplicates based on WebcamID
-		result := db.Where(storage.Webcam{WebcamID: dbWebcam.WebcamID}).FirstOrCreate(&dbWebcam)
-		if result.Error != nil {
-			log.Printf("Failed to save webcam %d: %v", dbWebcam.WebcamID, result.Error)
-			continue
-		}
-		if result.RowsAffected > 0 {
-			savedCount++
+		// Check if a webcam with the same ID already exists.
+		var existingWebcam storage.Webcam
+		if err := db.First(&existingWebcam, dbWebcam.WebcamID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				// Webcam does not exist, so create it.
+				log.Printf("Creating new record for webcam ID: %d", dbWebcam.WebcamID)
+				if createErr := db.Create(&dbWebcam).Error; createErr != nil {
+					log.Printf("Failed to create webcam %d: %v", dbWebcam.WebcamID, createErr)
+					continue
+				}
+				savedCount++
+			} else {
+				// Another error occurred.
+				log.Printf("Failed to query for webcam %d: %v", dbWebcam.WebcamID, err)
+			}
 		}
 	}
 
