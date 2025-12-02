@@ -3,7 +3,8 @@ package storage
 import (
 	"fmt"
 	"log"
-	"windy-cams/pkg/config"
+
+	"github.com/basel-ax/windy-cams/pkg/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,6 +14,7 @@ import (
 type Webcam struct {
 	gorm.Model
 	WebcamID  uint64 `gorm:"uniqueIndex"`
+	ApiStatus string
 	Status    string
 	Title     string `gorm:"index"`
 	Latitude  float64

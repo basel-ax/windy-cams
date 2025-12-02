@@ -52,11 +52,11 @@ The application is configured using environment variables. For local development
 ### Environment Variables
 
 -   `WINDY_API_KEY`: **(Required)** Your secret API key for the Windy API.
--   `API_LIMIT`: The maximum number of webcams to fetch. (Default: `50`)
--   `API_OFFSET`: The starting point for the webcam list. (Default: `0`)
--   `API_SORT_KEY`: The key to sort the results by. (Default: `createdOn`)
--   `API_SORT_DIRECTION`: The direction of the sort (`asc` or `desc`). (Default: `desc`)
--   `API_CONTINENTS`: The continent code to filter webcams by. (Default: `AF`)
+-   `API_LIMIT`: The maximum number of webcams to fetch (Default: `50`). Used only by the `fetch` command.
+-   `API_OFFSET`: The starting point for the webcam list (Default: `0`). Used only by the `fetch` command.
+-   `API_SORT_KEY`: The key to sort the results by (Default: `createdOn`). Used only by the `fetch` command.
+-   `API_SORT_DIRECTION`: The direction of the sort (`asc` or `desc`) (Default: `desc`). Used only by the `fetch` command.
+-   `API_CONTINENTS`: The continent code to filter webcams by (Default: `AF`). Used only by the `fetch` command.
 -   `DB_HOST`: **(Required)** The hostname of your PostgreSQL server.
 -   `DB_PORT`: **(Required)** The port for your PostgreSQL server.
 -   `DB_USER`: **(Required)** The username for the database.
@@ -66,13 +66,37 @@ The application is configured using environment variables. For local development
 
 ## Usage
 
-To run the microservice, execute the following command from the project's root directory:
+The application supports two commands, which can be run from the project's root directory: `fetch` and `fetchAll`.
+
+### Developer Mode
+
+Both commands accept an optional `--dev` flag that enables developer mode. In this mode, the raw JSON response from the Windy API will be printed to the console, which is useful for debugging.
+
+### `fetch` Command
+
+This command fetches webcams based on the settings in your `.env` file (`API_LIMIT`, `API_OFFSET`, `API_CONTINENTS`, etc.).
 
 ```sh
-go run cmd/main.go
+# Basic usage
+go run cmd/*.go fetch
+
+# With developer mode
+go run cmd/*.go fetch --dev
 ```
 
-The application will start, connect to the database, fetch data from the Windy API, and save any new webcams it finds.
+### `fetchAll` Command
+
+This command fetches all webcams from all continents, ignoring the `API_LIMIT`, `API_OFFSET`, and `API_CONTINENTS` settings in your `.env` file. It iterates through all available continents and paginates through the results to retrieve every webcam.
+
+```sh
+# Basic usage
+go run cmd/*.go fetchAll
+
+# With developer mode
+go run cmd/*.go fetchAll --dev
+```
+
+When run, the application will start, connect to the database, fetch data from the Windy API according to the specified command, and save any new webcams it finds.
 
 ## Project Structure
 

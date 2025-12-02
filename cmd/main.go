@@ -2,59 +2,36 @@ package main
 
 import (
 	"log"
-	"windy-cams/pkg/config"
-	"windy-cams/pkg/storage"
-	"windy-cams/pkg/windy"
+	"os"
 )
 
 func main() {
-	log.Println("Starting Windy Cams data fetcher...")
-
-	// Load configuration
-	cfg := config.New()
-	log.Println("Configuration loaded successfully.")
-
-	// Initialize database
-	db := storage.New(cfg)
-	log.Println("Database connection established and schema migrated.")
-
-	// Create Windy API client
-	windyClient := windy.NewClient(cfg.WindyAPIKey)
-	log.Println("Windy API client created.")
-
-	// Fetch webcams from the API
-	log.Println("Fetching webcams from Windy API...")
-	apiWebcams, err := windyClient.GetWebcams(cfg)
-	if err != nil {
-		log.Fatalf("Failed to fetch webcams: %v", err)
+	if len(os.Args) < 2 {
+		log.Println("Usage: go run cmd/*.go [command] [--dev]")
+		log.Println("Available commands: fetch, fetchAll")
+		return
 	}
-	log.Printf("Fetched %d webcams from the API.", len(apiWebcams))
 
-	// Transform and save webcams to the database
-	savedCount := 0
-	for _, apiWebcam := range apiWebcams {
-		dbWebcam := storage.Webcam{
-			WebcamID:  apiWebcam.ID,
-			Status:    apiWebcam.Status,
-			Title:     apiWebcam.Title,
-			Latitude:  apiWebcam.Location.Latitude,
-			Longitude: apiWebcam.Location.Longitude,
-			City:      apiWebcam.Location.City,
-			Country:   apiWebcam.Location.Country,
-			Continent: apiWebcam.Location.Continent,
-		}
+	var command string
+	devMode := false
 
-		// Using FirstOrCreate to avoid duplicates based on WebcamID
-		result := db.Where(storage.Webcam{WebcamID: dbWebcam.WebcamID}).FirstOrCreate(&dbWebcam)
-		if result.Error != nil {
-			log.Printf("Failed to save webcam %d: %v", dbWebcam.WebcamID, result.Error)
+	// Simple argument parsing
+	for _, arg := range os.Args[1:] {
+		if arg == "--dev" {
+			devMode = true
 			continue
 		}
-		if result.RowsAffected > 0 {
-			savedCount++
+		if command == "" {
+			command = arg
 		}
 	}
 
-	log.Printf("Successfully saved %d new webcams to the database.", savedCount)
-	log.Println("Windy Cams data fetcher finished successfully.")
+	switch command {
+	case "fetch":
+		runFetch(devMode)
+	case "fetchAll":
+		runFetchAll(devMode)
+	default:
+		log.Printf("Unknown command: '%s'. Available commands: fetch, fetchAll\n", command)
+	}
 }
