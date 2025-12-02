@@ -8,7 +8,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		log.Println("Usage: go run cmd/*.go [command] [--dev]")
-		log.Println("Available commands: fetch, fetchAll")
+		log.Println("Available commands: fetch, fetchAll, update")
 		return
 	}
 
@@ -31,7 +31,9 @@ func main() {
 		runFetch(devMode)
 	case "fetchAll":
 		runFetchAll(devMode)
+	case "update":
+		runUpdate(devMode)
 	default:
-		log.Printf("Unknown command: '%s'. Available commands: fetch, fetchAll\n", command)
+		log.Printf("Unknown command: '%s'. Available commands: fetch, fetchAll, update\n", command)
 	}
 }

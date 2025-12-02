@@ -66,7 +66,7 @@ The application is configured using environment variables. For local development
 
 ## Usage
 
-The application supports two commands, which can be run from the project's root directory: `fetch` and `fetchAll`.
+The application supports three commands, which can be run from the project's root directory: `fetch`, `fetchAll`, and `update`.
 
 ### Developer Mode
 
@@ -94,6 +94,18 @@ go run cmd/*.go fetchAll
 
 # With developer mode
 go run cmd/*.go fetchAll --dev
+```
+
+### `update` Command
+
+This command fetches detailed information for every webcam already stored in your database. It iterates through your local records, calls the Windy API for each one, and updates the record with the new, detailed data.
+
+```sh
+# Basic usage
+go run cmd/*.go update
+
+# With developer mode
+go run cmd/*.go update --dev
 ```
 
 When run, the application will start, connect to the database, fetch data from the Windy API according to the specified command, and save any new webcams it finds.

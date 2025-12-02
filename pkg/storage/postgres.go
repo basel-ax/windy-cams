@@ -8,6 +8,7 @@ import (
 
 	"github.com/basel-ax/windy-cams/pkg/config"
 
+	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -15,17 +16,26 @@ import (
 
 // Webcam defines the database model for a webcam.
 type Webcam struct {
-	WebcamID  uint64 `gorm:"primaryKey"`
-	ApiStatus string
-	Status    string
-	Title     string `gorm:"index"`
-	Latitude  float64
-	Longitude float64
-	City      string
-	Country   string
-	Continent string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	WebcamID      uint64 `gorm:"primaryKey"`
+	ApiStatus     string
+	Status        string
+	Title         string `gorm:"index"`
+	ViewCount     int
+	LastUpdatedOn time.Time
+	Latitude      float64
+	Longitude     float64
+	City          string
+	Region        string
+	RegionCode    string
+	Country       string
+	CountryCode   string
+	Continent     string
+	ContinentCode string
+	Categories    datatypes.JSON
+	Player        datatypes.JSON
+	Urls          datatypes.JSON
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // New initializes a new PostgreSQL database connection.
