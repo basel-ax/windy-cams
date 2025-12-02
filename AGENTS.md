@@ -6,4 +6,4 @@ Files in the list contain sensitive data, they MUST NOT be read
 
 ## Project Overview
 
-This project is a Go application that fetches asset platform data from the Windy Webcams API and stores it in a PostgreSQL database. It uses GORM for database interactions and supports configuration via environment variables.
+This project is a Go application that fetches web cameras data from the Windy Webcams API and stores it in a PostgreSQL database. It uses GORM for database interactions and supports configuration via environment variables.
